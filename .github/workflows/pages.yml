@@ -3,7 +3,7 @@ name: Deploy React app to GitHub Pages
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch:  # מאפשר גם Run ידני מה-UI
 
 permissions:
   contents: read
@@ -25,28 +25,31 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: npm
 
       - name: Install deps
         run: npm ci
 
-        - name: Build
-    run: npm run build
-    env:
-      CI: false
-
+      - name: Build
+        # CRA נופל על אזהרות ב-CI. מכבים CI כדי לא להכשיל build על ESLint warnings
+        run: |
+          echo "CI=false" >> $GITHUB_ENV
+          npm run build
+        env:
+          # חשוב לפריסת GitHub Pages תחת /Neched
+          PUBLIC_URL: /Neched
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./build
+          path: ./build   # תיקיית ה-build של CRA
 
   deploy:
-    needs: build
-    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4
