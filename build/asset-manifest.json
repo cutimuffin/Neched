@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/Neched/static/css/main.c5f49a55.css",
+    "main.js": "/Neched/static/js/main.12101566.js",
+    "index.html": "/Neched/index.html",
+    "main.c5f49a55.css.map": "/Neched/static/css/main.c5f49a55.css.map",
+    "main.12101566.js.map": "/Neched/static/js/main.12101566.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c5f49a55.css",
+    "static/js/main.12101566.js"
+  ]
+}
