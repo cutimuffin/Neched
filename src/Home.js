@@ -4,14 +4,19 @@ import { useTranslation } from "react-i18next";
 export default function Home() {
   const { t, i18n } = useTranslation();
 
+  // תפריטים
   const [showEmergency, setShowEmergency] = useState(false);
   const [showKupot, setShowKupot] = useState(false);
   const [showTaxi, setShowTaxi] = useState(false);
+
+  // מצב כהה + סקייל טקסט
   const [darkMode, setDarkMode] = useState(false);
   const [fontScale, setFontScale] = useState(0);
+
+  // שעה/תאריך
   const [clock, setClock] = useState("");
 
-  // טעינת העדפות + שפה
+  // טעינת העדפות + שפה + שעון
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("prefs") || "{}");
     if (typeof saved.darkMode === "boolean") setDarkMode(saved.darkMode);
@@ -21,33 +26,42 @@ export default function Home() {
 
     const savedLang = localStorage.getItem("lang") || "he";
     if (i18n.language !== savedLang) i18n.changeLanguage(savedLang);
-  }, [i18n]);
 
-  // עדכון שעון לפי שפה
-  useEffect(() => {
-    const tick = () => {
-      const now = new Date();
+    const formatClock = () => {
+      const lang = i18n.language || "he";
       const locale =
-        i18n.language === "he" ? "he-IL" :
-        i18n.language === "ru" ? "ru-RU" :
-        i18n.language === "am" ? "am-ET" : "en-US";
+        lang === "he" ? "he-IL" :
+        lang === "ru" ? "ru-RU" :
+        lang === "am" ? "am-ET" : "en-US";
+
+      const isNarrow = window.matchMedia("(max-width: 420px)").matches;
+      const now = new Date();
 
       const time = now.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
-      const date = now.toLocaleDateString(locale, {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+
+      const date = now.toLocaleDateString(
+        locale,
+        isNarrow
+          ? { day: "2-digit", month: "short", year: "numeric" }
+          : { weekday: "long", day: "numeric", month: "long", year: "numeric" }
+      );
 
       setClock(`${date} · ${time}`);
     };
 
-    tick();
-    const id = setInterval(tick, 60_000);
-    return () => clearInterval(id);
-  }, [i18n.language]);
+    formatClock();
+    const id = setInterval(formatClock, 60_000);
+    const onLang = () => formatClock();
+    i18n.on("languageChanged", onLang);
 
+    return () => {
+      clearInterval(id);
+      i18n.off("languageChanged", onLang);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // שמירת העדפות
   const persistPrefs = (next = {}) => {
     const current = JSON.parse(localStorage.getItem("prefs") || "{}");
     localStorage.setItem("prefs", JSON.stringify({ ...current, ...next }));
@@ -61,12 +75,14 @@ export default function Home() {
     });
   };
 
+  // שינוי שפה
   const onChangeLang = (e) => {
     const lang = e.target.value;
     i18n.changeLanguage(lang);
     localStorage.setItem("lang", lang);
   };
 
+  // מחלקות נושא/טקסט
   const theme = darkMode ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900";
   const scaleClass = ["text-base", "text-lg", "text-xl"][fontScale];
 
@@ -106,16 +122,12 @@ export default function Home() {
   return (
     <div className={`min-h-screen ${theme} ${scaleClass} antialiased`}>
       {/* כותרת עליונה */}
-      <header className={`mx-auto max-w-3xl px-4 pt-6 pb-4`}>
-        <div
-          className={`rounded-3xl p-4 border ${
-            darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"
-          }`}
-        >
-          <div className="flex items-center justify-between gap-3">
-            <div className="text-sm opacity-70">{clock}</div>
+      <header className="mx-auto max-w-3xl px-4 pt-6 pb-4">
+        <div className={`rounded-3xl p-4 border ${darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"}`}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="text-xs sm:text-sm opacity-70">{clock}</div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 justify-end">
               {/* בורר שפה */}
               <label className="flex items-center gap-2 text-sm">
                 <span className="opacity-70">{t("ui.language", { defaultValue: "שפה" })}:</span>
@@ -125,7 +137,6 @@ export default function Home() {
                   className={`rounded-md px-2 py-1 border text-sm ${
                     darkMode ? "bg-slate-800 border-white/10" : "bg-white border-slate-300"
                   }`}
-                  aria-label={t("ui.languageSelect", { defaultValue: "בחירת שפה" })}
                 >
                   <option value="he">עברית</option>
                   <option value="en">English</option>
@@ -171,9 +182,9 @@ export default function Home() {
         </div>
       </header>
 
-      {/* אריחים – 2×2 החל מ־420px */}
+      {/* אריחים – 2×2 ברירת מחדל, נופל ל-1×4 רק במסכים ממש צרים */}
       <main className="mx-auto max-w-3xl px-4 pb-12">
-        <section className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-4">
+        <section className="grid grid-cols-2 max-[380px]:grid-cols-1 gap-4">
           {/* חירום */}
           <div className="relative">
             <Card>
@@ -190,15 +201,12 @@ export default function Home() {
                   setShowTaxi(false);
                 }}
                 className="focus:outline-none"
-                aria-expanded={showEmergency}
-                aria-haspopup="menu"
               >
                 {iosIcon("from-rose-400", "to-rose-600", "🆘")}
               </button>
             </Card>
-
             {showEmergency && (
-              <div className={menuBox} role="menu">
+              <div className={menuBox}>
                 <a className="block px-4 py-2 hover:bg-black/5" href="tel:100">🚔 {t("home.police", { defaultValue: "משטרה" })} — 100</a>
                 <a className="block px-4 py-2 hover:bg-black/5" href="tel:101">🚑 {t("home.mda", { defaultValue: "מד״א" })} — 101</a>
                 <a className="block px-4 py-2 hover:bg-black/5" href="tel:102">🔥 {t("home.fire", { defaultValue: "כיבוי אש" })} — 102</a>
@@ -211,9 +219,7 @@ export default function Home() {
             <Card>
               <div>
                 <div className="font-bold">{t("home.bookDoctor", { defaultValue: "קבע תור לרופא" })}</div>
-                <div className="text-sm opacity-70">
-                  {t("home.kupotSub", { defaultValue: "כללית · מכבי · לאומית" })}
-                </div>
+                <div className="text-sm opacity-70">{t("home.kupotSub", { defaultValue: "כללית · מכבי · לאומית" })}</div>
               </div>
               <button
                 onClick={() => {
@@ -222,15 +228,12 @@ export default function Home() {
                   setShowTaxi(false);
                 }}
                 className="focus:outline-none"
-                aria-expanded={showKupot}
-                aria-haspopup="menu"
               >
                 {iosIcon("from-emerald-400", "to-emerald-600", "🩺")}
               </button>
             </Card>
-
             {showKupot && (
-              <div className={menuBox} role="menu">
+              <div className={menuBox}>
                 {kupot.map((k, i) => (
                   <a key={i} className="block px-4 py-2 hover:bg-black/5" href={k.url} target="_blank" rel="noreferrer noopener">
                     🏥 {k.name}
@@ -254,15 +257,12 @@ export default function Home() {
                   setShowKupot(false);
                 }}
                 className="focus:outline-none"
-                aria-expanded={showTaxi}
-                aria-haspopup="menu"
               >
                 {iosIcon("from-amber-400", "to-orange-600", "🚕")}
               </button>
             </Card>
-
             {showTaxi && (
-              <div className={menuBox} role="menu">
+              <div className={menuBox}>
                 {taxiApps.map((tapp, i) => (
                   <a key={i} className="block px-4 py-2 hover:bg-black/5" href={tapp.url} target="_blank" rel="noreferrer noopener">
                     🚖 {tapp.name}
