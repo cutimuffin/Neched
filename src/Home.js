@@ -9,10 +9,9 @@ export default function Home() {
   const [showKupot, setShowKupot] = useState(false);
   const [showTaxi, setShowTaxi] = useState(false);
 
-  // מצב כהה + סקייל טקסט + מצב נגיש
+  // מצב כהה + סקייל טקסט
   const [darkMode, setDarkMode] = useState(false);
   const [fontScale, setFontScale] = useState(0); // 0=רגיל, 1=גדול, 2=ענק
-  const [accessible, setAccessible] = useState(false);
 
   // שעה/תאריך
   const [clock, setClock] = useState("");
@@ -40,11 +39,10 @@ export default function Home() {
     };
   };
 
-  // טעינת העדפות + שפה
+  // טעינת העדפות
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("prefs") || "{}");
     if (typeof saved.darkMode === "boolean") setDarkMode(saved.darkMode);
-    if (typeof saved.accessible === "boolean") setAccessible(saved.accessible);
 
     const savedScale = Number(localStorage.getItem("fontScale"));
     if (!Number.isNaN(savedScale)) setFontScale(Math.min(2, Math.max(0, savedScale)));
@@ -54,7 +52,7 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // שעון – גם בהחלפת שפה
+  // שעון — מתעדכן גם בהחלפת שפה
   useEffect(() => {
     const tick = buildTick();
     tick();
@@ -113,10 +111,12 @@ export default function Home() {
     </div>
   );
 
-  // אייקון – בלי w-14/h-14, במקום זה class="icon" כדי ש־CSS יקבע את הגודל
   const iosIcon = (gradFrom, gradTo, emoji) => (
-    <div className={`icon text-white bg-gradient-to-br ${gradFrom} ${gradTo}`} aria-hidden="true">
-      <span>{emoji}</span>
+    <div
+      className={`grid place-items-center w-14 h-14 rounded-2xl text-white bg-gradient-to-br ${gradFrom} ${gradTo}`}
+      aria-hidden="true"
+    >
+      <span className="text-2xl">{emoji}</span>
     </div>
   );
 
@@ -125,7 +125,7 @@ export default function Home() {
   }`;
 
   return (
-    <div className={`min-h-screen ${theme} ${scaleClass} antialiased ${accessible ? "access-mode" : ""}`}>
+    <div className={`min-h-screen ${theme} ${scaleClass} antialiased`}>
       {/* כותרת */}
       <header className="mx-auto max-w-3xl px-4 pt-6 pb-4">
         <div className={`rounded-3xl p-4 border ${darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"}`}>
@@ -133,7 +133,7 @@ export default function Home() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="text-sm opacity-70">{clock}</div>
 
-            {/* פאנל שליטה */}
+            {/* פאנל שליטה — מסתדר יפה בשתי שורות במובייל */}
             <div className="flex flex-wrap items-center gap-2 justify-end">
               {/* שפה */}
               <label className="flex items-center gap-2 text-sm">
@@ -169,32 +169,12 @@ export default function Home() {
                   checked={darkMode}
                   onChange={() => {
                     setDarkMode((v) => {
-                      persistPrefs({ darkMode: !v, accessible });
+                      persistPrefs({ darkMode: !v });
                       return !v;
                     });
                   }}
                 />
                 {t("ui.darkMode", { defaultValue: "מצב כהה" })}
-              </label>
-
-              {/* מצב נגיש */}
-              <label className="flex items-center gap-2 cursor-pointer select-none text-sm">
-                <input
-                  type="checkbox"
-                  checked={accessible}
-                  onChange={() => {
-                    setAccessible((v) => {
-                      const next = !v;
-                      persistPrefs({ darkMode, accessible: next });
-                      if (next) {
-                        setFontScale(2); // נגישות → טקסט הכי גדול
-                        localStorage.setItem("fontScale", "2");
-                      }
-                      return next;
-                    });
-                  }}
-                />
-                {t("ui.accessMode", { defaultValue: "מצב נגיש" })}
               </label>
             </div>
           </div>
@@ -209,7 +189,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* אריחים – 2×2; במסכים צרים מאוד יורד ל־1×4 */}
+      {/* אריחים – 2×2 כבסיס; למסכים צרים מאוד נופל ל־1×4 */}
       <main className="mx-auto max-w-3xl px-4 pb-12">
         <section className="grid grid-cols-2 gap-3 sm:gap-4 max-[380px]:grid-cols-1">
           {/* חירום */}
