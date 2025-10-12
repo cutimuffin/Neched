@@ -1,134 +1,22 @@
-/* ✅ השורה המקורית שלך — לא נמחקת */
-html,body {
-  margin: 0;
-  padding: 0;
-  font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+/* בסיס נקי – בלי אנימציות */
+html,body{
+  margin:0;
+  padding:0;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
 }
 
-/* 🌅 רקע עדין לכל הדף */
-body {
-  background:
-    radial-gradient(1200px 600px at 75% -100px, #eef2ff 0%, #f8fafc 40%, #ffffff 100%);
+/* רקע עדין (אפשר להסיר אם רוצים לבן חלק) */
+body{
+  background: radial-gradient(1200px 600px at 75% -100px, #eef2ff 0%, #f8fafc 40%, #ffffff 100%);
 }
 
-/* 📦 כרטיס בסיסי עם אפקט זכוכית */
-.card {
-  position: relative;
-  overflow: hidden;
-  border-radius: 1rem;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 10px 30px rgba(0,0,0,.08);
-  transition: none;
-}
-.card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: linear-gradient(135deg, #c7d2fe, #e5e7eb, #bae6fd);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  pointer-events: none;
-  opacity: .7;
-}
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 34px rgba(0,0,0,.12);
-}
-
-/* 🌑 מצב כהה */
-.dark .card {
-  background: rgba(2, 6, 23, .7);
-  border-color: rgba(255,255,255,.10);
-}
-.dark .card::before {
-  background: linear-gradient(135deg, #6366f1, #475569, #38bdf8);
-  opacity: .25;
-}
-
-/* ☎️ טאץ' נעים יותר */
-html { -webkit-tap-highlight-color: transparent; }
-button, select { min-height: 44px; }
-
-/* ✨ אפקט הופעה רכה לכל הדף */
-.fade-in {
-  opacity: 0;
-  animation: fadeIn 0.6s ease-out forwards;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* 🪄 אפקט הופעה מדורג לכרטיסים */
-.card-fade {
-  opacity: 0;
-  animation: cardFadeIn 0.6s ease-out forwards;
-}
-@keyframes cardFadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-/* ⏳ דיליי מדורג */
-.card-fade:nth-child(1) { animation-delay: 0.20s; }
-.card-fade:nth-child(2) { animation-delay: 0.35s; }
-.card-fade:nth-child(3) { animation-delay: 0.50s; }
-.card-fade:nth-child(4) { animation-delay: 0.65s; }
-/* ──────────────────────────────────────────────────────────
-   כיבוי מוחלט של תנועה/אנימציות בכרטיסים במובייל (מסכי מגע)
-   ────────────────────────────────────────────────────────── */
-@media (hover: none) and (pointer: coarse) {
-  /* אין הבהוב כחול באנדרואיד/iOS */
-  * { -webkit-tap-highlight-color: transparent; }
-
-  /* ביטול מוחלט של תנועה/אנימציות/פילטרים בכרטיס וכל ילדיו */
-  .card,
-  .card * ,
-  .card::before,
-  .card::after {
-    transition: none !important;
-    animation: none !important;
-    transform: none !important;
-    filter: none !important;
-    will-change: auto !important;
-  }
-
-  /* שמירת צל קבוע ובלי תזוזה בלחיצה/פוקוס */
-  .card {
-    box-shadow: 0 10px 30px rgba(0,0,0,.08) !important;
-    transform: none !important;
-  }
-  .card:active,
-  .card:focus {
-    box-shadow: 0 10px 30px rgba(0,0,0,.08) !important;
-    transform: none !important;
-  }
-
-  /* אם יש תפריטי dropdown (role="menu")—בלי אנימציה/טרנזישן */
-  [role="menu"],
-  [role="menu"] * {
-    transition: none !important;
-    animation: none !important;
-    transform: none !important;
-  }
-}
-
-/* ──────────────────────────────────────────────────────────
-   בדסקטופ: להשאיר הובר עדין, בלי "קפיצה" בלחיצה
-   ────────────────────────────────────────────────────────── */
-@media (hover: hover) and (pointer: fine) {
-  .card {
-    transition: transform .2s ease, box-shadow .2s ease;
-  }
-  .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 16px 36px rgba(0,0,0,.10);
-  }
-  /* בלחיצה אין scale/קפיצה */
-  .card:active {
-    transform: translateY(0);
-  }
+/* כרטיסים: נקי, ללא hover/transition כלל */
+.card{
+  position:relative;
+  overflow:hidden;
+  border-radius:16px;
+  background:#fff;
+  border:1px solid #e5e7eb;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  transition:none;
 }
