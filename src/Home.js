@@ -11,7 +11,7 @@ export default function Home() {
 
   // מצב כהה + סקייל טקסט
   const [darkMode, setDarkMode] = useState(false);
-  const [fontScale, setFontScale] = useState(0);
+  const [fontScale, setFontScale] = useState(0); // 0 רגיל, 1 גדול, 2 ענק (מצב נגיש)
 
   // שעון
   const [clock, setClock] = useState("");
@@ -23,9 +23,11 @@ export default function Home() {
     return "en-US";
   };
 
+  // טוען העדפות ושפה
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("prefs") || "{}");
     if (typeof saved.darkMode === "boolean") setDarkMode(saved.darkMode);
+
     const savedScale = Number(localStorage.getItem("fontScale"));
     if (!Number.isNaN(savedScale)) setFontScale(Math.min(2, Math.max(0, savedScale)));
 
@@ -33,6 +35,7 @@ export default function Home() {
     if (i18n.language !== savedLang) i18n.changeLanguage(savedLang);
   }, [i18n]);
 
+  // שעון ריאקטיבי לשפה
   useEffect(() => {
     const tick = () => {
       const now = new Date();
@@ -51,6 +54,7 @@ export default function Home() {
     return () => clearInterval(id);
   }, [i18n.language]);
 
+  // שמירת העדפות
   const persistPrefs = (next = {}) => {
     const current = JSON.parse(localStorage.getItem("prefs") || "{}");
     localStorage.setItem("prefs", JSON.stringify({ ...current, ...next }));
@@ -70,11 +74,16 @@ export default function Home() {
     localStorage.setItem("lang", lang);
   };
 
+  // נושא + סקייל טקסט
   const theme = darkMode ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900";
   const scaleClass = ["text-base", "text-lg", "text-xl"][fontScale];
 
+  // נתוני כפתורים
   const kupot = [
-    { name: t("kupot.clalit", { defaultValue: "כללית" }), url: "https://e-services.clalit.co.il/onlinewebquick/%D7%96%D7%9E%D7%9F_%D7%AA%D7%95%D7%A8" },
+    {
+      name: t("kupot.clalit", { defaultValue: "כללית" }),
+      url: "https://e-services.clalit.co.il/onlinewebquick/%D7%96%D7%9E%D7%9F_%D7%AA%D7%95%D7%A8",
+    },
     { name: t("kupot.maccabi", { defaultValue: "מכבי" }), url: "https://www.maccabi4u.co.il/14-he/Maccabi.aspx" },
     { name: t("kupot.leumit", { defaultValue: "לאומית" }), url: "https://home.leumit.co.il/" },
   ];
@@ -83,6 +92,7 @@ export default function Home() {
     { name: "Yango", url: "https://yango.com/he_il/" },
   ];
 
+  // קומפוננטת אריח
   const Card = ({ children }) => (
     <div
       className={`card relative rounded-2xl border ${
@@ -109,67 +119,87 @@ export default function Home() {
   return (
     <div className={`min-h-screen ${theme} ${scaleClass} antialiased`}>
       {/* כותרת עליונה */}
-      <header className={`mx-auto max-w-3xl px-4 pt-6 pb-4`}>
-        <div
-          className={`rounded-3xl p-4 border ${
-            darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"
-          }`}
-        >
-          {/* שורה עליונה */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="text-sm opacity-70">{clock}</div>
+      <header className="mx-auto max-w-3xl px-4 pt-6 pb-4">
+        <div className={`rounded-3xl p-4 border ${darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"}`}>
+          {/* === פריסת Header חדשה: שורה 1 – שעון שמאל, שפה ימין; שורה 2 – בקרים מימין בלבד === */}
+          <div className="header-grid">
+            {/* שמאל עליון: שעון */}
+            <div className="header-clock text-sm opacity-70">{clock}</div>
 
-            <label className="flex items-center gap-2 text-sm">
-              <span className="opacity-70">{t("ui.language", { defaultValue: "שפה" })}:</span>
-              <select
-                value={i18n.language}
-                onChange={onChangeLang}
-                className={`rounded-md px-2 py-1 border text-sm ${
-                  darkMode ? "bg-slate-800 border-white/10" : "bg-white border-slate-300"
-                }`}
-              >
-                <option value="he">עברית</option>
-                <option value="en">English</option>
-                <option value="ru">Русский</option>
-                <option value="am">አማርኛ</option>
-              </select>
-            </label>
-          </div>
-
-          {/* שורה שנייה */}
-          <div className="mt-3 flex items-center justify-end gap-3 flex-wrap">
-            <div
-              className={`flex items-center gap-1 rounded-full px-2 py-1 border ${
-                darkMode ? "border-white/15 bg-white/5" : "border-slate-300 bg-slate-50"
-              }`}
-            >
-              <button onClick={() => changeScale(-1)} disabled={fontScale === 0}>A–</button>
-              <div className="w-px h-4 bg-current/20" />
-              <button onClick={() => changeScale(1)} disabled={fontScale === 2}>A+</button>
+            {/* ימין עליון: בחירת שפה */}
+            <div className="header-lang">
+              <label className="flex items-center gap-2 text-sm">
+                <span className="opacity-70">{t("ui.language", { defaultValue: "שפה" })}:</span>
+                <select
+                  value={i18n.language}
+                  onChange={onChangeLang}
+                  className={`rounded-md px-2 py-1 border text-sm ${
+                    darkMode ? "bg-slate-800 border-white/10" : "bg-white border-slate-300"
+                  }`}
+                  aria-label={t("ui.languageSelect", { defaultValue: "בחירת שפה" })}
+                >
+                  <option value="he">עברית</option>
+                  <option value="en">English</option>
+                  <option value="ru">Русский</option>
+                  <option value="am">አማርኛ</option>
+                </select>
+              </label>
             </div>
 
-            <label className="flex items-center gap-2 cursor-pointer select-none text-sm">
-              <input
-                type="checkbox"
-                checked={darkMode}
-                onChange={() => {
-                  setDarkMode((v) => {
-                    persistPrefs({ darkMode: !v });
-                    return !v;
-                  });
-                }}
-              />
-              {t("ui.darkMode", { defaultValue: "מצב כהה" })}
-            </label>
+            {/* שורה שנייה: בקרים מימין */}
+            <div className="header-controls">
+              <div
+                className={`header-chip flex items-center gap-1 ${
+                  darkMode ? "" : ""
+                }`}
+                aria-label={t("ui.fontControl", { defaultValue: "בקרת גודל טקסט" })}
+              >
+                <button
+                  onClick={() => changeScale(-1)}
+                  className="px-2 py-0.5 rounded-md"
+                  disabled={fontScale === 0}
+                  title="A–"
+                >
+                  A–
+                </button>
+                <div className="w-px h-4 bg-current/20" />
+                <button
+                  onClick={() => changeScale(1)}
+                  className="px-2 py-0.5 rounded-md"
+                  disabled={fontScale === 2}
+                  title="A+"
+                >
+                  A+
+                </button>
+              </div>
 
-            <label className="flex items-center gap-2 cursor-pointer select-none text-sm">
-              <input
-                type="checkbox"
-                checked={fontScale === 2}
-                onChange={(e) => setFontScale(e.target.checked ? 2 : 0)}
-              />
-              {t("ui.accessibilityMode", { defaultValue: "מצב נגיש" })}
-            </label>
+              <label className="header-chip flex items-center gap-2 cursor-pointer select-none text-sm">
+                <input
+                  type="checkbox"
+                  checked={darkMode}
+                  onChange={() => {
+                    setDarkMode((v) => {
+                      persistPrefs({ darkMode: !v });
+                      return !v;
+                    });
+                  }}
+                />
+                {t("ui.darkMode", { defaultValue: "מצב כהה" })}
+              </label>
+
+              <label className="header-chip flex items-center gap-2 cursor-pointer select-none text-sm">
+                <input
+                  type="checkbox"
+                  checked={fontScale === 2}
+                  onChange={(e) => {
+                    const on = e.target.checked;
+                    setFontScale(on ? 2 : 0);
+                    localStorage.setItem("fontScale", String(on ? 2 : 0));
+                  }}
+                />
+                {t("ui.accessibilityMode", { defaultValue: "מצב נגיש" })}
+              </label>
+            </div>
           </div>
 
           <h1 className="text-3xl md:text-4xl font-extrabold mt-2 text-indigo-700 dark:text-indigo-300">
@@ -181,15 +211,17 @@ export default function Home() {
         </div>
       </header>
 
-      {/* אריחים */}
+      {/* אריחים – 2×2 בדסקטופ / 1×4 במובייל */}
       <main className="mx-auto max-w-3xl px-4 pb-12">
-        <section className="grid grid-cols-2 gap-4 sm:gap-4 max-[380px]:grid-cols-1">
+        <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* חירום */}
           <div className="relative">
             <Card>
               <div>
                 <div className="font-bold">{t("home.emergency", { defaultValue: "חירום" })}</div>
-                <div className="text-sm opacity-70">{t("home.emergencySub", { defaultValue: "משטרה · מד״א · כיבוי" })}</div>
+                <div className="text-sm opacity-70">
+                  {t("home.emergencySub", { defaultValue: "משטרה · מד״א · כיבוי" })}
+                </div>
               </div>
               <button
                 onClick={() => {
@@ -197,15 +229,25 @@ export default function Home() {
                   setShowKupot(false);
                   setShowTaxi(false);
                 }}
+                className="focus:outline-none"
+                aria-expanded={showEmergency}
+                aria-haspopup="menu"
               >
                 {iosIcon("from-rose-400", "to-rose-600", "🆘")}
               </button>
             </Card>
+
             {showEmergency && (
               <div className={menuBox} role="menu">
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:100">🚔 {t("home.police")} — 100</a>
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:101">🚑 {t("home.mda")} — 101</a>
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:102">🔥 {t("home.fire")} — 102</a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:100">
+                  🚔 {t("home.police", { defaultValue: "משטרה" })} — 100
+                </a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:101">
+                  🚑 {t("home.mda", { defaultValue: "מד״א" })} — 101
+                </a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:102">
+                  🔥 {t("home.fire", { defaultValue: "כיבוי אש" })} — 102
+                </a>
               </div>
             )}
           </div>
@@ -215,7 +257,9 @@ export default function Home() {
             <Card>
               <div>
                 <div className="font-bold">{t("home.bookDoctor", { defaultValue: "קבע תור לרופא" })}</div>
-                <div className="text-sm opacity-70">{t("home.kupotSub", { defaultValue: "כללית · מכבי · לאומית" })}</div>
+                <div className="text-sm opacity-70">
+                  {t("home.kupotSub", { defaultValue: "כללית · מכבי · לאומית" })}
+                </div>
               </div>
               <button
                 onClick={() => {
@@ -223,14 +267,24 @@ export default function Home() {
                   setShowEmergency(false);
                   setShowTaxi(false);
                 }}
+                className="focus:outline-none"
+                aria-expanded={showKupot}
+                aria-haspopup="menu"
               >
                 {iosIcon("from-emerald-400", "to-emerald-600", "🩺")}
               </button>
             </Card>
+
             {showKupot && (
               <div className={menuBox} role="menu">
                 {kupot.map((k, i) => (
-                  <a key={i} className="block px-4 py-2 hover:bg-black/5" href={k.url} target="_blank" rel="noreferrer noopener">
+                  <a
+                    key={i}
+                    className="block px-4 py-2 hover:bg-black/5"
+                    href={k.url}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
                     🏥 {k.name}
                   </a>
                 ))}
@@ -251,14 +305,24 @@ export default function Home() {
                   setShowEmergency(false);
                   setShowKupot(false);
                 }}
+                className="focus:outline-none"
+                aria-expanded={showTaxi}
+                aria-haspopup="menu"
               >
                 {iosIcon("from-amber-400", "to-orange-600", "🚕")}
               </button>
             </Card>
+
             {showTaxi && (
               <div className={menuBox} role="menu">
                 {taxiApps.map((tapp, i) => (
-                  <a key={i} className="block px-4 py-2 hover:bg-black/5" href={tapp.url} target="_blank" rel="noreferrer noopener">
+                  <a
+                    key={i}
+                    className="block px-4 py-2 hover:bg-black/5"
+                    href={tapp.url}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
                     🚖 {tapp.name}
                   </a>
                 ))}
@@ -266,7 +330,7 @@ export default function Home() {
             )}
           </div>
 
-          {/* מרחב מוגן */}
+          {/* מרחב מוגן קרוב */}
           <a
             className="block"
             href="https://www.google.com/maps/search/?api=1&query=%D7%9E%D7%A8%D7%97%D7%91+%D7%9E%D7%95%D7%92%D7%9F+%D7%A7%D7%A8%D7%95%D7%91"
