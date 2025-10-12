@@ -16,7 +16,7 @@ export default function Home() {
   // שעה/תאריך
   const [clock, setClock] = useState("");
 
-  // טעינת העדפות + שפה
+  // ✅ טעינת העדפות + שפה
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("prefs") || "{}");
     if (typeof saved.darkMode === "boolean") setDarkMode(saved.darkMode);
@@ -27,23 +27,32 @@ export default function Home() {
     // שפה
     const savedLang = localStorage.getItem("lang") || "he";
     if (i18n.language !== savedLang) i18n.changeLanguage(savedLang);
+  }, [i18n]);
 
+  // ✅ עדכון שעון לפי שפה
+  useEffect(() => {
     const tick = () => {
       const now = new Date();
-      const time = now.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
-      const date = now.toLocaleDateString("he-IL", {
+      const locale =
+        i18n.language === "he" ? "he-IL" :
+        i18n.language === "ru" ? "ru-RU" :
+        i18n.language === "am" ? "am-ET" : "en-US";
+
+      const time = now.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+      const date = now.toLocaleDateString(locale, {
         weekday: "long",
         year: "numeric",
         month: "long",
         day: "numeric",
       });
+
       setClock(`${date} · ${time}`);
     };
+
     tick();
     const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [i18n.language]);
 
   // שמירת העדפות
   const persistPrefs = (next = {}) => {
