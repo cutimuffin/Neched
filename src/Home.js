@@ -11,12 +11,12 @@ export default function Home() {
 
   // מצב כהה + סקייל טקסט
   const [darkMode, setDarkMode] = useState(false);
-  const [fontScale, setFontScale] = useState(0); // 0=רגיל, 1=גדול, 2=ענק
+  const [fontScale, setFontScale] = useState(0);
 
   // שעה/תאריך
   const [clock, setClock] = useState("");
 
-  // לוקאל לפי שפה
+  // פונקציה שמתאימה פורמט לפי שפה
   const localeForClock = (lng) => {
     if (lng === "he") return "he-IL";
     if (lng === "ru") return "ru-RU";
@@ -24,22 +24,7 @@ export default function Home() {
     return "en-US";
   };
 
-  const buildTick = () => {
-    const loc = localeForClock(i18n.language);
-    return () => {
-      const now = new Date();
-      const time = now.toLocaleTimeString(loc, { hour: "2-digit", minute: "2-digit" });
-      const date = now.toLocaleDateString(loc, {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-      setClock(`${date} · ${time}`);
-    };
-  };
-
-  // טעינת העדפות
+  // טעינת העדפות + שפה
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("prefs") || "{}");
     if (typeof saved.darkMode === "boolean") setDarkMode(saved.darkMode);
@@ -49,16 +34,25 @@ export default function Home() {
 
     const savedLang = localStorage.getItem("lang") || "he";
     if (i18n.language !== savedLang) i18n.changeLanguage(savedLang);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [i18n]);
 
-  // שעון — מתעדכן גם בהחלפת שפה
+  // שעון מתעדכן לפי שפה
   useEffect(() => {
-    const tick = buildTick();
+    const tick = () => {
+      const now = new Date();
+      const loc = localeForClock(i18n.language);
+      const time = now.toLocaleTimeString(loc, { hour: "2-digit", minute: "2-digit" });
+      const date = now.toLocaleDateString(loc, {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      setClock(`${date} · ${time}`);
+    };
     tick();
     const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i18n.language]);
 
   // שמירת העדפות
@@ -75,23 +69,17 @@ export default function Home() {
     });
   };
 
-  // שינוי שפה
   const onChangeLang = (e) => {
     const lang = e.target.value;
     i18n.changeLanguage(lang);
     localStorage.setItem("lang", lang);
   };
 
-  // מחלקות לנושא/טקסט
   const theme = darkMode ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900";
   const scaleClass = ["text-base", "text-lg", "text-xl"][fontScale];
 
-  // קופות + מוניות
   const kupot = [
-    {
-      name: t("kupot.clalit", { defaultValue: "כללית" }),
-      url: "https://e-services.clalit.co.il/onlinewebquick/%D7%96%D7%9E%D7%9F_%D7%AA%D7%95%D7%A8",
-    },
+    { name: t("kupot.clalit", { defaultValue: "כללית" }), url: "https://e-services.clalit.co.il/onlinewebquick/%D7%96%D7%9E%D7%9F_%D7%AA%D7%95%D7%A8" },
     { name: t("kupot.maccabi", { defaultValue: "מכבי" }), url: "https://www.maccabi4u.co.il/14-he/Maccabi.aspx" },
     { name: t("kupot.leumit", { defaultValue: "לאומית" }), url: "https://home.leumit.co.il/" },
   ];
@@ -100,12 +88,11 @@ export default function Home() {
     { name: "Yango", url: "https://yango.com/he_il/" },
   ];
 
-  // כרטיס נקי (מתבסס על .card ב-CSS)
   const Card = ({ children }) => (
     <div
       className={`card relative rounded-2xl border ${
         darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"
-      } p-3 sm:p-4 flex items-center justify-between`}
+      } p-4 flex items-center justify-between`}
     >
       {children}
     </div>
@@ -113,7 +100,7 @@ export default function Home() {
 
   const iosIcon = (gradFrom, gradTo, emoji) => (
     <div
-      className={`grid place-items-center w-14 h-14 rounded-2xl text-white bg-gradient-to-br ${gradFrom} ${gradTo}`}
+      className={`w-14 h-14 grid place-items-center rounded-2xl text-white bg-gradient-to-br ${gradFrom} ${gradTo}`}
       aria-hidden="true"
     >
       <span className="text-2xl">{emoji}</span>
@@ -126,60 +113,71 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen ${theme} ${scaleClass} antialiased`}>
-      {/* כותרת */}
-      <header className="mx-auto max-w-3xl px-4 pt-6 pb-4">
-        <div className={`rounded-3xl p-4 border ${darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"}`}>
-          {/* שורה 1: שעה + שליטה */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* כותרת עליונה */}
+      <header className={`mx-auto max-w-3xl px-4 pt-6 pb-4`}>
+        <div
+          className={`rounded-3xl p-4 border ${
+            darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"
+          }`}
+        >
+          {/* שורה עליונה */}
+          <div className="flex items-center justify-between gap-3">
             <div className="text-sm opacity-70">{clock}</div>
 
-            {/* פאנל שליטה — מסתדר יפה בשתי שורות במובייל */}
-            <div className="flex flex-wrap items-center gap-2 justify-end">
-              {/* שפה */}
-              <label className="flex items-center gap-2 text-sm">
-                <span className="opacity-70">{t("ui.language", { defaultValue: "שפה" })}:</span>
-                <select
-                  value={i18n.language}
-                  onChange={onChangeLang}
-                  className={`rounded-md px-2 py-1 border text-sm ${darkMode ? "bg-slate-800 border-white/10" : "bg-white border-slate-300"}`}
-                  aria-label={t("ui.languageSelect", { defaultValue: "בחירת שפה" })}
-                >
-                  <option value="he">עברית</option>
-                  <option value="en">English</option>
-                  <option value="ru">Русский</option>
-                  <option value="am">አማርኛ</option>
-                </select>
-              </label>
-
-              {/* A-/A+ */}
-              <div
-                className={`flex items-center gap-1 rounded-full px-2 py-1 border ${
-                  darkMode ? "border-white/15 bg-white/5" : "border-slate-300 bg-slate-50"
+            <label className="flex items-center gap-2 text-sm">
+              <span className="opacity-70">{t("ui.language", { defaultValue: "שפה" })}:</span>
+              <select
+                value={i18n.language}
+                onChange={onChangeLang}
+                className={`rounded-md px-2 py-1 border text-sm ${
+                  darkMode ? "bg-slate-800 border-white/10" : "bg-white border-slate-300"
                 }`}
+                aria-label={t("ui.languageSelect", { defaultValue: "בחירת שפה" })}
               >
-                <button onClick={() => changeScale(-1)} className="px-2 py-0.5 rounded-md" disabled={fontScale === 0}>A–</button>
-                <div className="w-px h-4 bg-current/20" />
-                <button onClick={() => changeScale(1)} className="px-2 py-0.5 rounded-md" disabled={fontScale === 2}>A+</button>
-              </div>
-
-              {/* מצב כהה */}
-              <label className="flex items-center gap-2 cursor-pointer select-none text-sm">
-                <input
-                  type="checkbox"
-                  checked={darkMode}
-                  onChange={() => {
-                    setDarkMode((v) => {
-                      persistPrefs({ darkMode: !v });
-                      return !v;
-                    });
-                  }}
-                />
-                {t("ui.darkMode", { defaultValue: "מצב כהה" })}
-              </label>
-            </div>
+                <option value="he">עברית</option>
+                <option value="en">English</option>
+                <option value="ru">Русский</option>
+                <option value="am">አማርኛ</option>
+              </select>
+            </label>
           </div>
 
-          {/* כותרת הדף */}
+          {/* שורה שנייה – בקרי נגישות/כהה/גודל */}
+          <div className="mt-3 flex items-center justify-end gap-3 flex-wrap">
+            <div
+              className={`flex items-center gap-1 rounded-full px-2 py-1 border ${
+                darkMode ? "border-white/15 bg-white/5" : "border-slate-300 bg-slate-50"
+              }`}
+            >
+              <button onClick={() => changeScale(-1)} disabled={fontScale === 0}>A–</button>
+              <div className="w-px h-4 bg-current/20" />
+              <button onClick={() => changeScale(1)} disabled={fontScale === 2}>A+</button>
+            </div>
+
+            <label className="flex items-center gap-2 cursor-pointer select-none text-sm">
+              <input
+                type="checkbox"
+                checked={darkMode}
+                onChange={() => {
+                  setDarkMode((v) => {
+                    persistPrefs({ darkMode: !v });
+                    return !v;
+                  });
+                }}
+              />
+              {t("ui.darkMode", { defaultValue: "מצב כהה" })}
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer select-none text-sm">
+              <input
+                type="checkbox"
+                checked={fontScale === 2}
+                onChange={(e) => setFontScale(e.target.checked ? 2 : 0)}
+              />
+              {t("ui.accessibilityMode", { defaultValue: "מצב נגיש" })}
+            </label>
+          </div>
+
           <h1 className="text-3xl md:text-4xl font-extrabold mt-2 text-indigo-700 dark:text-indigo-300">
             {t("home.welcome", { defaultValue: "ברוכים הבאים ל“נכד” 👋" })}
           </h1>
@@ -189,9 +187,9 @@ export default function Home() {
         </div>
       </header>
 
-      {/* אריחים – 2×2 כבסיס; למסכים צרים מאוד נופל ל־1×4 */}
+      {/* אריחים */}
       <main className="mx-auto max-w-3xl px-4 pb-12">
-        <section className="grid grid-cols-2 gap-3 sm:gap-4 max-[380px]:grid-cols-1">
+        <section className="grid grid-cols-2 gap-4 sm:gap-4 max-[380px]:grid-cols-1">
           {/* חירום */}
           <div className="relative">
             <Card>
@@ -206,17 +204,15 @@ export default function Home() {
                   setShowTaxi(false);
                 }}
                 className="focus:outline-none"
-                aria-expanded={showEmergency}
-                aria-haspopup="menu"
               >
                 {iosIcon("from-rose-400", "to-rose-600", "🆘")}
               </button>
             </Card>
             {showEmergency && (
               <div className={menuBox} role="menu">
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:100">🚔 {t("home.police", { defaultValue: "משטרה" })} — 100</a>
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:101">🚑 {t("home.mda", { defaultValue: "מד״א" })} — 101</a>
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:102">🔥 {t("home.fire", { defaultValue: "כיבוי אש" })} — 102</a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:100">🚔 {t("home.police")} — 100</a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:101">🚑 {t("home.mda")} — 101</a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:102">🔥 {t("home.fire")} — 102</a>
               </div>
             )}
           </div>
@@ -235,8 +231,6 @@ export default function Home() {
                   setShowTaxi(false);
                 }}
                 className="focus:outline-none"
-                aria-expanded={showKupot}
-                aria-haspopup="menu"
               >
                 {iosIcon("from-emerald-400", "to-emerald-600", "🩺")}
               </button>
@@ -252,7 +246,7 @@ export default function Home() {
             )}
           </div>
 
-          {/* הזמן מונית */}
+          {/* מונית */}
           <div className="relative">
             <Card>
               <div>
@@ -266,8 +260,6 @@ export default function Home() {
                   setShowKupot(false);
                 }}
                 className="focus:outline-none"
-                aria-expanded={showTaxi}
-                aria-haspopup="menu"
               >
                 {iosIcon("from-amber-400", "to-orange-600", "🚕")}
               </button>
@@ -283,7 +275,7 @@ export default function Home() {
             )}
           </div>
 
-          {/* מרחב מוגן קרוב */}
+          {/* מרחב מוגן */}
           <a
             className="block"
             href="https://www.google.com/maps/search/?api=1&query=%D7%9E%D7%A8%D7%97%D7%91+%D7%9E%D7%95%D7%92%D7%9F+%D7%A7%D7%A8%D7%95%D7%91"
@@ -293,7 +285,9 @@ export default function Home() {
             <Card>
               <div>
                 <div className="font-bold">{t("home.shelter", { defaultValue: "מרחב מוגן קרוב" })}</div>
-                <div className="text-sm opacity-70">{t("home.shelterSub", { defaultValue: "מצא מרחב מוגן קרוב (Google Maps)" })}</div>
+                <div className="text-sm opacity-70">
+                  {t("home.shelterSub", { defaultValue: "מצא מרחב מוגן קרוב (Google Maps)" })}
+                </div>
               </div>
               {iosIcon("from-sky-400", "to-blue-600", "🛡️")}
             </Card>
