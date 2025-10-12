@@ -1,0 +1,27 @@
+{
+  "ui": {
+    "language": "Language",
+    "languageSelect": "Select language",
+    "fontControl": "Font size control",
+    "increase": "Increase text",
+    "decrease": "Decrease text",
+    "darkMode": "Dark mode"
+  },
+  "home": {
+    "welcome": "Welcome to “Neched” 👋",
+    "subtitle": "Everyday services in one tap — with bigger text when you need it.",
+    "emergency": "Emergency",
+    "emergencySub": "Police · Ambulance · Fire",
+    "police": "Police",
+    "mda": "Ambulance",
+    "fire": "Fire",
+    "bookDoctor": "Book a Doctor",
+    "kupotSub": "Clalit · Maccabi · Leumit",
+    "orderTaxi": "Order a Taxi",
+    "taxiSub": "Gett · Yango",
+    "shelter": "Nearest Shelter",
+    "shelterSub": "Find a safe room near you (Google Maps)",
+    "footer": "Simple service. In your language."
+  },
+  "kupot": { "clalit": "Clalit", "maccabi": "Maccabi", "leumit": "Leumit" }
+}
