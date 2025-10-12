@@ -16,7 +16,7 @@ export default function Home() {
   // שעה/תאריך
   const [clock, setClock] = useState("");
 
-  // קובע לוקאל לשעון לפי שפה
+  // לוקאל לפי שפה
   const localeForClock = (lng) => {
     if (lng === "he") return "he-IL";
     if (lng === "ru") return "ru-RU";
@@ -24,7 +24,6 @@ export default function Home() {
     return "en-US";
   };
 
-  // עדכון שעון לפי השפה
   const buildTick = () => {
     const loc = localeForClock(i18n.language);
     return () => {
@@ -40,7 +39,7 @@ export default function Home() {
     };
   };
 
-  // טעינת העדפות + שפה (פעם אחת)
+  // טעינת העדפות
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("prefs") || "{}");
     if (typeof saved.darkMode === "boolean") setDarkMode(saved.darkMode);
@@ -53,10 +52,10 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // שעון: רץ ומוחלף בכל שינוי שפה
+  // שעון — מתעדכן גם בהחלפת שפה
   useEffect(() => {
     const tick = buildTick();
-    tick(); // עדכון מיידי
+    tick();
     const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -83,7 +82,7 @@ export default function Home() {
     localStorage.setItem("lang", lang);
   };
 
-  // מחלקות נושא/טקסט
+  // מחלקות לנושא/טקסט
   const theme = darkMode ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900";
   const scaleClass = ["text-base", "text-lg", "text-xl"][fontScale];
 
@@ -101,12 +100,12 @@ export default function Home() {
     { name: "Yango", url: "https://yango.com/he_il/" },
   ];
 
-  // קומפוננטת אריח — הוספנו className="card" כדי שה-CSS למובייל יבטל טרנזישנים/אנימציות
+  // כרטיס נקי (מתבסס על .card ב-CSS)
   const Card = ({ children }) => (
     <div
-      className={`card relative select-none rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.08)] border ${
+      className={`card relative rounded-2xl border ${
         darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"
-      } p-4 flex items-center justify-between`}
+      } p-3 sm:p-4 flex items-center justify-between`}
     >
       {children}
     </div>
@@ -126,27 +125,23 @@ export default function Home() {
   }`;
 
   return (
-    <div className={`min-h-screen ${theme} ${scaleClass} antialiased fade-in`}>
-      {/* כותרת עליונה */}
-      <header className={`mx-auto max-w-3xl px-4 pt-6 pb-4`}>
-        <div
-          className={`rounded-3xl p-4 border ${
-            darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"
-          }`}
-        >
-          <div className="flex items-center justify-between gap-3">
+    <div className={`min-h-screen ${theme} ${scaleClass} antialiased`}>
+      {/* כותרת */}
+      <header className="mx-auto max-w-3xl px-4 pt-6 pb-4">
+        <div className={`rounded-3xl p-4 border ${darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"}`}>
+          {/* שורה 1: שעה + שליטה */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="text-sm opacity-70">{clock}</div>
 
-            <div className="flex items-center gap-2">
-              {/* בורר שפה */}
+            {/* פאנל שליטה — מסתדר יפה בשתי שורות במובייל */}
+            <div className="flex flex-wrap items-center gap-2 justify-end">
+              {/* שפה */}
               <label className="flex items-center gap-2 text-sm">
                 <span className="opacity-70">{t("ui.language", { defaultValue: "שפה" })}:</span>
                 <select
                   value={i18n.language}
                   onChange={onChangeLang}
-                  className={`rounded-md px-2 py-1 border text-sm ${
-                    darkMode ? "bg-slate-800 border-white/10" : "bg-white border-slate-300"
-                  }`}
+                  className={`rounded-md px-2 py-1 border text-sm ${darkMode ? "bg-slate-800 border-white/10" : "bg-white border-slate-300"}`}
                   aria-label={t("ui.languageSelect", { defaultValue: "בחירת שפה" })}
                 >
                   <option value="he">עברית</option>
@@ -161,27 +156,10 @@ export default function Home() {
                 className={`flex items-center gap-1 rounded-full px-2 py-1 border ${
                   darkMode ? "border-white/15 bg-white/5" : "border-slate-300 bg-slate-50"
                 }`}
-                aria-label={t("ui.fontControl", { defaultValue: "בקרת גודל טקסט" })}
               >
-                <button
-                  onClick={() => changeScale(-1)}
-                  className="px-2 py-0.5 rounded-md"
-                  aria-label={t("ui.decrease", { defaultValue: "הקטנת טקסט" })}
-                  disabled={fontScale === 0}
-                  title="A–"
-                >
-                  A–
-                </button>
+                <button onClick={() => changeScale(-1)} className="px-2 py-0.5 rounded-md" disabled={fontScale === 0}>A–</button>
                 <div className="w-px h-4 bg-current/20" />
-                <button
-                  onClick={() => changeScale(1)}
-                  className="px-2 py-0.5 rounded-md"
-                  aria-label={t("ui.increase", { defaultValue: "הגדלת טקסט" })}
-                  disabled={fontScale === 2}
-                  title="A+"
-                >
-                  A+
-                </button>
+                <button onClick={() => changeScale(1)} className="px-2 py-0.5 rounded-md" disabled={fontScale === 2}>A+</button>
               </div>
 
               {/* מצב כהה */}
@@ -201,6 +179,7 @@ export default function Home() {
             </div>
           </div>
 
+          {/* כותרת הדף */}
           <h1 className="text-3xl md:text-4xl font-extrabold mt-2 text-indigo-700 dark:text-indigo-300">
             {t("home.welcome", { defaultValue: "ברוכים הבאים ל“נכד” 👋" })}
           </h1>
@@ -210,17 +189,15 @@ export default function Home() {
         </div>
       </header>
 
-      {/* אריחים – 2×2 ברירת מחדל; למסכים ממש צרים יורד ל־1×4 */}
+      {/* אריחים – 2×2 כבסיס; למסכים צרים מאוד נופל ל־1×4 */}
       <main className="mx-auto max-w-3xl px-4 pb-12">
-        <section className="grid grid-cols-2 gap-4 max-[380px]:grid-cols-1">
+        <section className="grid grid-cols-2 gap-3 sm:gap-4 max-[380px]:grid-cols-1">
           {/* חירום */}
-          <div className="relative ani-stagger">
+          <div className="relative">
             <Card>
               <div>
                 <div className="font-bold">{t("home.emergency", { defaultValue: "חירום" })}</div>
-                <div className="text-sm opacity-70">
-                  {t("home.emergencySub", { defaultValue: "משטרה · מד״א · כיבוי" })}
-                </div>
+                <div className="text-sm opacity-70">{t("home.emergencySub", { defaultValue: "משטרה · מד״א · כיבוי" })}</div>
               </div>
               <button
                 onClick={() => {
@@ -235,30 +212,21 @@ export default function Home() {
                 {iosIcon("from-rose-400", "to-rose-600", "🆘")}
               </button>
             </Card>
-
             {showEmergency && (
               <div className={menuBox} role="menu">
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:100">
-                  🚔 {t("home.police", { defaultValue: "משטרה" })} — 100
-                </a>
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:101">
-                  🚑 {t("home.mda", { defaultValue: "מד״א" })} — 101
-                </a>
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:102">
-                  🔥 {t("home.fire", { defaultValue: "כיבוי אש" })} — 102
-                </a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:100">🚔 {t("home.police", { defaultValue: "משטרה" })} — 100</a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:101">🚑 {t("home.mda", { defaultValue: "מד״א" })} — 101</a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:102">🔥 {t("home.fire", { defaultValue: "כיבוי אש" })} — 102</a>
               </div>
             )}
           </div>
 
           {/* קבע תור לרופא */}
-          <div className="relative ani-stagger">
+          <div className="relative">
             <Card>
               <div>
                 <div className="font-bold">{t("home.bookDoctor", { defaultValue: "קבע תור לרופא" })}</div>
-                <div className="text-sm opacity-70">
-                  {t("home.kupotSub", { defaultValue: "כללית · מכבי · לאומית" })}
-                </div>
+                <div className="text-sm opacity-70">{t("home.kupotSub", { defaultValue: "כללית · מכבי · לאומית" })}</div>
               </div>
               <button
                 onClick={() => {
@@ -273,17 +241,10 @@ export default function Home() {
                 {iosIcon("from-emerald-400", "to-emerald-600", "🩺")}
               </button>
             </Card>
-
             {showKupot && (
               <div className={menuBox} role="menu">
                 {kupot.map((k, i) => (
-                  <a
-                    key={i}
-                    className="block px-4 py-2 hover:bg-black/5"
-                    href={k.url}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                  >
+                  <a key={i} className="block px-4 py-2 hover:bg-black/5" href={k.url} target="_blank" rel="noreferrer noopener">
                     🏥 {k.name}
                   </a>
                 ))}
@@ -292,7 +253,7 @@ export default function Home() {
           </div>
 
           {/* הזמן מונית */}
-          <div className="relative ani-stagger">
+          <div className="relative">
             <Card>
               <div>
                 <div className="font-bold">{t("home.orderTaxi", { defaultValue: "הזמן מונית" })}</div>
@@ -311,17 +272,10 @@ export default function Home() {
                 {iosIcon("from-amber-400", "to-orange-600", "🚕")}
               </button>
             </Card>
-
             {showTaxi && (
               <div className={menuBox} role="menu">
                 {taxiApps.map((tapp, i) => (
-                  <a
-                    key={i}
-                    className="block px-4 py-2 hover:bg-black/5"
-                    href={tapp.url}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                  >
+                  <a key={i} className="block px-4 py-2 hover:bg-black/5" href={tapp.url} target="_blank" rel="noreferrer noopener">
                     🚖 {tapp.name}
                   </a>
                 ))}
@@ -331,7 +285,7 @@ export default function Home() {
 
           {/* מרחב מוגן קרוב */}
           <a
-            className="block ani-stagger"
+            className="block"
             href="https://www.google.com/maps/search/?api=1&query=%D7%9E%D7%A8%D7%97%D7%91+%D7%9E%D7%95%D7%92%D7%9F+%D7%A7%D7%A8%D7%95%D7%91"
             target="_blank"
             rel="noreferrer noopener"
@@ -339,9 +293,7 @@ export default function Home() {
             <Card>
               <div>
                 <div className="font-bold">{t("home.shelter", { defaultValue: "מרחב מוגן קרוב" })}</div>
-                <div className="text-sm opacity-70">
-                  {t("home.shelterSub", { defaultValue: "מצא מרחב מוגן קרוב (Google Maps)" })}
-                </div>
+                <div className="text-sm opacity-70">{t("home.shelterSub", { defaultValue: "מצא מרחב מוגן קרוב (Google Maps)" })}</div>
               </div>
               {iosIcon("from-sky-400", "to-blue-600", "🛡️")}
             </Card>
