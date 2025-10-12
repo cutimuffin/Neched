@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
+  const { t, i18n } = useTranslation();
+
   // תפריטים
   const [showEmergency, setShowEmergency] = useState(false);
   const [showKupot, setShowKupot] = useState(false);
@@ -13,13 +16,17 @@ export default function Home() {
   // שעה/תאריך
   const [clock, setClock] = useState("");
 
-  // טעינת העדפות
+  // טעינת העדפות + שפה
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("prefs") || "{}");
     if (typeof saved.darkMode === "boolean") setDarkMode(saved.darkMode);
 
     const savedScale = Number(localStorage.getItem("fontScale"));
     if (!Number.isNaN(savedScale)) setFontScale(Math.min(2, Math.max(0, savedScale)));
+
+    // שפה
+    const savedLang = localStorage.getItem("lang") || "he";
+    if (i18n.language !== savedLang) i18n.changeLanguage(savedLang);
 
     const tick = () => {
       const now = new Date();
@@ -35,6 +42,7 @@ export default function Home() {
     tick();
     const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // שמירת העדפות
@@ -51,15 +59,25 @@ export default function Home() {
     });
   };
 
+  // שינוי שפה
+  const onChangeLang = (e) => {
+    const lang = e.target.value;
+    i18n.changeLanguage(lang);
+    localStorage.setItem("lang", lang);
+  };
+
   // מחלקות נושא/טקסט
   const theme = darkMode ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900";
   const scaleClass = ["text-base", "text-lg", "text-xl"][fontScale];
 
   // קופות + מוניות
   const kupot = [
-    { name: "כללית", url: "https://e-services.clalit.co.il/onlinewebquick/%D7%96%D7%9E%D7%9F_%D7%AA%D7%95%D7%A8" },
-    { name: "מכבי", url: "https://www.maccabi4u.co.il/14-he/Maccabi.aspx" },
-    { name: "לאומית", url: "https://home.leumit.co.il/" },
+    {
+      name: t("kupot.clalit", { defaultValue: "כללית" }),
+      url: "https://e-services.clalit.co.il/onlinewebquick/%D7%96%D7%9E%D7%9F_%D7%AA%D7%95%D7%A8",
+    },
+    { name: t("kupot.maccabi", { defaultValue: "מכבי" }), url: "https://www.maccabi4u.co.il/14-he/Maccabi.aspx" },
+    { name: t("kupot.leumit", { defaultValue: "לאומית" }), url: "https://home.leumit.co.il/" },
   ];
   const taxiApps = [
     { name: "Gett", url: "https://gett.com/il/" },
@@ -93,9 +111,7 @@ export default function Home() {
   return (
     <div className={`min-h-screen ${theme} ${scaleClass} antialiased`}>
       {/* כותרת עליונה */}
-      <header
-        className={`mx-auto max-w-3xl px-4 pt-6 pb-4`}
-      >
+      <header className={`mx-auto max-w-3xl px-4 pt-6 pb-4`}>
         <div
           className={`rounded-3xl p-4 border ${
             darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"
@@ -105,17 +121,35 @@ export default function Home() {
             <div className="text-sm opacity-70">{clock}</div>
 
             <div className="flex items-center gap-2">
+              {/* בורר שפה */}
+              <label className="flex items-center gap-2 text-sm">
+                <span className="opacity-70">{t("ui.language", { defaultValue: "שפה" })}:</span>
+                <select
+                  value={i18n.language}
+                  onChange={onChangeLang}
+                  className={`rounded-md px-2 py-1 border text-sm ${
+                    darkMode ? "bg-slate-800 border-white/10" : "bg-white border-slate-300"
+                  }`}
+                  aria-label={t("ui.languageSelect", { defaultValue: "בחירת שפה" })}
+                >
+                  <option value="he">עברית</option>
+                  <option value="en">English</option>
+                  <option value="ru">Русский</option>
+                  <option value="am">አማርኛ</option>
+                </select>
+              </label>
+
               {/* A-/A+ */}
               <div
                 className={`flex items-center gap-1 rounded-full px-2 py-1 border ${
                   darkMode ? "border-white/15 bg-white/5" : "border-slate-300 bg-slate-50"
                 }`}
-                aria-label="בקרת גודל טקסט"
+                aria-label={t("ui.fontControl", { defaultValue: "בקרת גודל טקסט" })}
               >
                 <button
                   onClick={() => changeScale(-1)}
                   className="px-2 py-0.5 rounded-md"
-                  aria-label="הקטנת טקסט"
+                  aria-label={t("ui.decrease", { defaultValue: "הקטנת טקסט" })}
                   disabled={fontScale === 0}
                   title="A–"
                 >
@@ -125,7 +159,7 @@ export default function Home() {
                 <button
                   onClick={() => changeScale(1)}
                   className="px-2 py-0.5 rounded-md"
-                  aria-label="הגדלת טקסט"
+                  aria-label={t("ui.increase", { defaultValue: "הגדלת טקסט" })}
                   disabled={fontScale === 2}
                   title="A+"
                 >
@@ -145,15 +179,17 @@ export default function Home() {
                     });
                   }}
                 />
-                מצב כהה
+                {t("ui.darkMode", { defaultValue: "מצב כהה" })}
               </label>
             </div>
           </div>
 
           <h1 className="text-3xl md:text-4xl font-extrabold mt-2 text-indigo-700 dark:text-indigo-300">
-            ברוכים הבאים ל“נכד” 👋
+            {t("home.welcome", { defaultValue: "ברוכים הבאים ל“נכד” 👋" })}
           </h1>
-          <p className="mt-1 opacity-70 text-sm">שירותים יומיומיים בלחיצה – בעברית ובגדלים שמתאימים לך.</p>
+          <p className="mt-1 opacity-70 text-sm">
+            {t("home.subtitle", { defaultValue: "שירותים יומיומיים בלחיצה – בעברית ובגדלים שמתאימים לך." })}
+          </p>
         </div>
       </header>
 
@@ -164,8 +200,10 @@ export default function Home() {
           <div className="relative">
             <Card>
               <div>
-                <div className="font-bold">חירום</div>
-                <div className="text-sm opacity-70">משטרה · מד״א · כיבוי</div>
+                <div className="font-bold">{t("home.emergency", { defaultValue: "חירום" })}</div>
+                <div className="text-sm opacity-70">
+                  {t("home.emergencySub", { defaultValue: "משטרה · מד״א · כיבוי" })}
+                </div>
               </div>
               <button
                 onClick={() => {
@@ -183,9 +221,15 @@ export default function Home() {
 
             {showEmergency && (
               <div className={menuBox} role="menu">
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:100">🚔 משטרה — 100</a>
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:101">🚑 מד״א — 101</a>
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:102">🔥 כיבוי אש — 102</a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:100">
+                  🚔 {t("home.police", { defaultValue: "משטרה" })} — 100
+                </a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:101">
+                  🚑 {t("home.mda", { defaultValue: "מד״א" })} — 101
+                </a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:102">
+                  🔥 {t("home.fire", { defaultValue: "כיבוי אש" })} — 102
+                </a>
               </div>
             )}
           </div>
@@ -194,8 +238,10 @@ export default function Home() {
           <div className="relative">
             <Card>
               <div>
-                <div className="font-bold">קבע תור לרופא</div>
-                <div className="text-sm opacity-70">כללית · מכבי · לאומית</div>
+                <div className="font-bold">{t("home.bookDoctor", { defaultValue: "קבע תור לרופא" })}</div>
+                <div className="text-sm opacity-70">
+                  {t("home.kupotSub", { defaultValue: "כללית · מכבי · לאומית" })}
+                </div>
               </div>
               <button
                 onClick={() => {
@@ -232,8 +278,8 @@ export default function Home() {
           <div className="relative">
             <Card>
               <div>
-                <div className="font-bold">הזמן מונית</div>
-                <div className="text-sm opacity-70">Gett · Yango</div>
+                <div className="font-bold">{t("home.orderTaxi", { defaultValue: "הזמן מונית" })}</div>
+                <div className="text-sm opacity-70">{t("home.taxiSub", { defaultValue: "Gett · Yango" })}</div>
               </div>
               <button
                 onClick={() => {
@@ -251,15 +297,15 @@ export default function Home() {
 
             {showTaxi && (
               <div className={menuBox} role="menu">
-                {taxiApps.map((t, i) => (
+                {taxiApps.map((tapp, i) => (
                   <a
                     key={i}
                     className="block px-4 py-2 hover:bg-black/5"
-                    href={t.url}
+                    href={tapp.url}
                     target="_blank"
                     rel="noreferrer noopener"
                   >
-                    🚖 {t.name}
+                    🚖 {tapp.name}
                   </a>
                 ))}
               </div>
@@ -275,8 +321,10 @@ export default function Home() {
           >
             <Card>
               <div>
-                <div className="font-bold">מרחב מוגן קרוב</div>
-                <div className="text-sm opacity-70">מצא מרחב מוגן קרוב (Google Maps)</div>
+                <div className="font-bold">{t("home.shelter", { defaultValue: "מרחב מוגן קרוב" })}</div>
+                <div className="text-sm opacity-70">
+                  {t("home.shelterSub", { defaultValue: "מצא מרחב מוגן קרוב (Google Maps)" })}
+                </div>
               </div>
               {iosIcon("from-sky-400", "to-blue-600", "🛡️")}
             </Card>
@@ -285,7 +333,7 @@ export default function Home() {
       </main>
 
       <footer className="mx-auto max-w-3xl px-4 pb-10 opacity-60 text-xs">
-        שירות פשוט. בעברית. בשבילך.
+        {t("home.footer", { defaultValue: "שירות פשוט. בעברית. בשבילך." })}
       </footer>
     </div>
   );
