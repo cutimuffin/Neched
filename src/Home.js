@@ -4,19 +4,14 @@ import { useTranslation } from "react-i18next";
 export default function Home() {
   const { t, i18n } = useTranslation();
 
-  // תפריטים
   const [showEmergency, setShowEmergency] = useState(false);
   const [showKupot, setShowKupot] = useState(false);
   const [showTaxi, setShowTaxi] = useState(false);
-
-  // מצב כהה + סקייל טקסט
   const [darkMode, setDarkMode] = useState(false);
-  const [fontScale, setFontScale] = useState(0); // 0=רגיל, 1=גדול, 2=ענק
-
-  // שעה/תאריך
+  const [fontScale, setFontScale] = useState(0);
   const [clock, setClock] = useState("");
 
-  // ✅ טעינת העדפות + שפה
+  // טעינת העדפות + שפה
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("prefs") || "{}");
     if (typeof saved.darkMode === "boolean") setDarkMode(saved.darkMode);
@@ -24,12 +19,11 @@ export default function Home() {
     const savedScale = Number(localStorage.getItem("fontScale"));
     if (!Number.isNaN(savedScale)) setFontScale(Math.min(2, Math.max(0, savedScale)));
 
-    // שפה
     const savedLang = localStorage.getItem("lang") || "he";
     if (i18n.language !== savedLang) i18n.changeLanguage(savedLang);
   }, [i18n]);
 
-  // ✅ עדכון שעון לפי שפה
+  // עדכון שעון לפי שפה
   useEffect(() => {
     const tick = () => {
       const now = new Date();
@@ -54,7 +48,6 @@ export default function Home() {
     return () => clearInterval(id);
   }, [i18n.language]);
 
-  // שמירת העדפות
   const persistPrefs = (next = {}) => {
     const current = JSON.parse(localStorage.getItem("prefs") || "{}");
     localStorage.setItem("prefs", JSON.stringify({ ...current, ...next }));
@@ -68,23 +61,17 @@ export default function Home() {
     });
   };
 
-  // שינוי שפה
   const onChangeLang = (e) => {
     const lang = e.target.value;
     i18n.changeLanguage(lang);
     localStorage.setItem("lang", lang);
   };
 
-  // מחלקות נושא/טקסט
   const theme = darkMode ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900";
   const scaleClass = ["text-base", "text-lg", "text-xl"][fontScale];
 
-  // קופות + מוניות
   const kupot = [
-    {
-      name: t("kupot.clalit", { defaultValue: "כללית" }),
-      url: "https://e-services.clalit.co.il/onlinewebquick/%D7%96%D7%9E%D7%9F_%D7%AA%D7%95%D7%A8",
-    },
+    { name: t("kupot.clalit", { defaultValue: "כללית" }), url: "https://e-services.clalit.co.il/onlinewebquick/%D7%96%D7%9E%D7%9F_%D7%AA%D7%95%D7%A8" },
     { name: t("kupot.maccabi", { defaultValue: "מכבי" }), url: "https://www.maccabi4u.co.il/14-he/Maccabi.aspx" },
     { name: t("kupot.leumit", { defaultValue: "לאומית" }), url: "https://home.leumit.co.il/" },
   ];
@@ -93,12 +80,11 @@ export default function Home() {
     { name: "Yango", url: "https://yango.com/he_il/" },
   ];
 
-  // קומפוננטת אריח
   const Card = ({ children }) => (
     <div
       className={`relative select-none rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.08)] border ${
         darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"
-      } p-4 flex items-center justify-between`}
+      } p-3 sm:p-4 flex items-center justify-between`}
     >
       {children}
     </div>
@@ -106,10 +92,10 @@ export default function Home() {
 
   const iosIcon = (gradFrom, gradTo, emoji) => (
     <div
-      className={`grid place-items-center w-14 h-14 rounded-2xl text-white bg-gradient-to-br ${gradFrom} ${gradTo}`}
+      className={`grid place-items-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl text-white bg-gradient-to-br ${gradFrom} ${gradTo}`}
       aria-hidden="true"
     >
-      <span className="text-2xl">{emoji}</span>
+      <span className="text-xl sm:text-2xl">{emoji}</span>
     </div>
   );
 
@@ -153,27 +139,10 @@ export default function Home() {
                 className={`flex items-center gap-1 rounded-full px-2 py-1 border ${
                   darkMode ? "border-white/15 bg-white/5" : "border-slate-300 bg-slate-50"
                 }`}
-                aria-label={t("ui.fontControl", { defaultValue: "בקרת גודל טקסט" })}
               >
-                <button
-                  onClick={() => changeScale(-1)}
-                  className="px-2 py-0.5 rounded-md"
-                  aria-label={t("ui.decrease", { defaultValue: "הקטנת טקסט" })}
-                  disabled={fontScale === 0}
-                  title="A–"
-                >
-                  A–
-                </button>
+                <button onClick={() => changeScale(-1)} className="px-2 py-0.5 rounded-md" disabled={fontScale === 0}>A–</button>
                 <div className="w-px h-4 bg-current/20" />
-                <button
-                  onClick={() => changeScale(1)}
-                  className="px-2 py-0.5 rounded-md"
-                  aria-label={t("ui.increase", { defaultValue: "הגדלת טקסט" })}
-                  disabled={fontScale === 2}
-                  title="A+"
-                >
-                  A+
-                </button>
+                <button onClick={() => changeScale(1)} className="px-2 py-0.5 rounded-md" disabled={fontScale === 2}>A+</button>
               </div>
 
               {/* מצב כהה */}
@@ -202,9 +171,9 @@ export default function Home() {
         </div>
       </header>
 
-      {/* אריחים – 2×2 במסכים רחבים, 1×4 במובייל */}
+      {/* אריחים – 2×2 החל מ־420px */}
       <main className="mx-auto max-w-3xl px-4 pb-12">
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <section className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-4">
           {/* חירום */}
           <div className="relative">
             <Card>
@@ -230,15 +199,9 @@ export default function Home() {
 
             {showEmergency && (
               <div className={menuBox} role="menu">
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:100">
-                  🚔 {t("home.police", { defaultValue: "משטרה" })} — 100
-                </a>
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:101">
-                  🚑 {t("home.mda", { defaultValue: "מד״א" })} — 101
-                </a>
-                <a className="block px-4 py-2 hover:bg-black/5" href="tel:102">
-                  🔥 {t("home.fire", { defaultValue: "כיבוי אש" })} — 102
-                </a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:100">🚔 {t("home.police", { defaultValue: "משטרה" })} — 100</a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:101">🚑 {t("home.mda", { defaultValue: "מד״א" })} — 101</a>
+                <a className="block px-4 py-2 hover:bg-black/5" href="tel:102">🔥 {t("home.fire", { defaultValue: "כיבוי אש" })} — 102</a>
               </div>
             )}
           </div>
@@ -269,13 +232,7 @@ export default function Home() {
             {showKupot && (
               <div className={menuBox} role="menu">
                 {kupot.map((k, i) => (
-                  <a
-                    key={i}
-                    className="block px-4 py-2 hover:bg-black/5"
-                    href={k.url}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                  >
+                  <a key={i} className="block px-4 py-2 hover:bg-black/5" href={k.url} target="_blank" rel="noreferrer noopener">
                     🏥 {k.name}
                   </a>
                 ))}
@@ -307,13 +264,7 @@ export default function Home() {
             {showTaxi && (
               <div className={menuBox} role="menu">
                 {taxiApps.map((tapp, i) => (
-                  <a
-                    key={i}
-                    className="block px-4 py-2 hover:bg-black/5"
-                    href={tapp.url}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                  >
+                  <a key={i} className="block px-4 py-2 hover:bg-black/5" href={tapp.url} target="_blank" rel="noreferrer noopener">
                     🚖 {tapp.name}
                   </a>
                 ))}
