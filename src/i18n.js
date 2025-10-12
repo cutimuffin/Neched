@@ -5,124 +5,142 @@ export const SUPPORTED_LANGS = ["he", "en", "ru", "am"];
 const FALLBACK_LANG = "he";
 const STORAGE_KEY = "lang";
 
-// ---------- מילונים (כמו שהיה אצלך) ----------
 const resources = {
-  he: { translation: {
-    appTitle: 'ברוכים הבאים ל״נכד״',
-    appSubtitle: "שירותים יומיומיים – בלחיצה אחת",
-    emergency: "חירום",
-    emergency_hint: "משטרה · מד״א · כיבוי",
-    police: "משטרה — 100",
-    mada: "מד״א — 101",
-    fire: "כיבוי אש — 102",
-    doctor: "קבע תור לרופא",
-    doctor_hint: "כללית · מכבי · לאומית",
-    taxi: "הזמן מונית",
-    taxi_hint: "Gett · Yango",
-    help: "עזרה",
-    help1: "לחצו על כפתורי השירותים – כל כפתור מוביל לאתר או פעולה.",
-    help2: "השתמשו בהגדרות כדי להגדיל טקסט או להדליק מצב כהה.",
-    help3: "אם עדיין קשה, בקשו עזרה מקרוב משפחה.",
-    settings: "הגדרות נגישות",
-    dark: "מצב כהה",
-    large: "הגדלת טקסט",
-    cancel: "ביטול",
-    save: "שמור",
-    footer: "שירות פשוט. בעברית. בשבילך.",
-    shelterBtn: "מצא מרחב מוגן קרוב",
-    shelterTile: "מרחב מוגן קרוב",
-    locationDenied: "הגישה למיקום נחסמה. ניתן לאפשר דרך הגדרות הדפדפן.",
-    locationError: "לא הצלחנו לקבל מיקום. נסה שוב.",
-    langLabel: "שפה",
-  }},
-  en: { translation: {
-    appTitle: 'Welcome to "Neched"',
-    appSubtitle: "Everyday services — one tap away",
-    emergency: "Emergency",
-    emergency_hint: "Police · Ambulance · Fire",
-    police: "Police — 100",
-    mada: "Ambulance — 101",
-    fire: "Fire — 102",
-    doctor: "Book a Doctor",
-    doctor_hint: "Clalit · Maccabi · Leumit",
-    taxi: "Order a Taxi",
-    taxi_hint: "Gett · Yango",
-    help: "Help",
-    help1: "Click service buttons — each leads to an action or site.",
-    help2: "Use Settings for dark mode or larger text.",
-    help3: "If still hard, ask a family member for help.",
-    settings: "Accessibility Settings",
-    dark: "Dark Mode",
-    large: "Large Text",
-    cancel: "Cancel",
-    save: "Save",
-    footer: "Simple service. For you.",
-    shelterBtn: "Find nearest shelter",
-    shelterTile: "Nearest Shelter",
-    locationDenied: "Location access was denied. Enable it in browser settings.",
-    locationError: "Could not get your location. Try again.",
-    langLabel: "Language",
-  }},
-  ru: { translation: {
-    appTitle: 'Добро пожаловать в «Нехед»',
-    appSubtitle: "Повседневные услуги — в один клик",
-    emergency: "Экстренные службы",
-    emergency_hint: "Полиция · Скорая · Пожарные",
-    police: "Полиция — 100",
-    mada: "Скорая — 101",
-    fire: "Пожарные — 102",
-    doctor: "Запись к врачу",
-    doctor_hint: "Клалит · Маккаби · Леумит",
-    taxi: "Заказать такси",
-    taxi_hint: "Gett · Yango",
-    help: "Помощь",
-    help1: "Нажимайте на кнопки — каждая открывает сайт или действие.",
-    help2: "В настройках можно включить тёмную тему и крупный шрифт.",
-    help3: "Если трудно, попросите помощи родственника.",
-    settings: "Настройки доступности",
-    dark: "Тёмная тема",
-    large: "Крупный шрифт",
-    cancel: "Отмена",
-    save: "Сохранить",
-    footer: "Простой сервис. Для вас.",
-    shelterBtn: "Найти ближайшее убежище",
-    shelterTile: "Ближайшее убежище",
-    locationDenied: "Доступ к геолокации запрещён. Разрешите в настройках браузера.",
-    locationError: "Не удалось получить геопозицию. Попробуйте снова.",
-    langLabel: "Язык",
-  }},
-  am: { translation: {
-    appTitle: 'እንኳን ወደ “ነኸድ” በደህና መጡ',
-    appSubtitle: "ዕለታዊ አገልግሎቶች – በአንድ ጠቅ",
-    emergency: "አስቸኳይ",
-    emergency_hint: "ፖሊስ · አምቡላንስ · እሳት",
-    police: "ፖሊስ — 100",
-    mada: "አምቡላንስ — 101",
-    fire: "እሳት — 102",
-    doctor: "ሐኪም ይዘጋጁ",
-    doctor_hint: "ክላሊት · ማካቢ · ለኡሚት",
-    taxi: "ታክሲ ይዘዙ",
-    taxi_hint: "Gett · Yango",
-    help: "እርዳታ",
-    help1: "ቁልፎቹን ይጫኑ — እያንዳንዱ ወደ ተግባር/ገጽ ይመራል።",
-    help2: "ለጨለማ ሁኔታ ወይም ትልቅ ጽሑፍ ቅንብሮችን ይጠቀሙ።",
-    help3: "ካስፈለገ ከቤተሰብ እርዳታ ይጠይቁ።",
-    settings: "ማስተካከያ ቅንብሮች",
-    dark: "ጨለማ ሁኔታ",
-    large: "ትልቅ ጽሑፍ",
-    cancel: "ሰርዝ",
-    save: "አስቀምጥ",
-    footer: "ቀላል አገልግሎት። ለእርስዎ።",
-    shelterBtn: "ቅርብ መጠለያ ፈልግ",
-    shelterTile: "ቅርብ መጠለያ",
-    locationDenied: "የአካባቢ ፍቃድ ተከልክሏል። በአሳሽ ቅንብር ይክፈቱት።",
-    locationError: "አካባቢ ማግኘት አልተሳካም። እንደገና ይሞክሩ።",
-    langLabel: "ቋንቋ",
-  }},
+  he: {
+    translation: {
+      ui: {
+        language: "שפה",
+        languageSelect: "בחירת שפה",
+        fontControl: "בקרת גודל טקסט",
+        decrease: "הקטנת טקסט",
+        increase: "הגדלת טקסט",
+        darkMode: "מצב כהה",
+      },
+      home: {
+        welcome: "ברוכים הבאים ל“נכד” 👋",
+        subtitle: "שירותים יומיומיים בלחיצה – בעברית ובגדלים שמתאימים לך.",
+        emergency: "חירום",
+        emergencySub: "משטרה · מד״א · כיבוי",
+        police: "משטרה",
+        mda: "מד״א",
+        fire: "כיבוי אש",
+        bookDoctor: "קבע תור לרופא",
+        kupotSub: "כללית · מכבי · לאומית",
+        orderTaxi: "הזמן מונית",
+        taxiSub: "Gett · Yango",
+        shelter: "מרחב מוגן קרוב",
+        shelterSub: "מצא מרחב מוגן קרוב (Google Maps)",
+        footer: "שירות פשוט. בעברית. בשבילך.",
+      },
+      kupot: {
+        clalit: "כללית",
+        maccabi: "מכבי",
+        leumit: "לאומית",
+      },
+    },
+  },
+  en: {
+    translation: {
+      ui: {
+        language: "Language",
+        languageSelect: "Choose language",
+        fontControl: "Text size control",
+        decrease: "Decrease text",
+        increase: "Increase text",
+        darkMode: "Dark mode",
+      },
+      home: {
+        welcome: 'Welcome to "Neched" 👋',
+        subtitle: "Everyday services at a tap — in your language and size.",
+        emergency: "Emergency",
+        emergencySub: "Police · Ambulance · Fire",
+        police: "Police",
+        mda: "Ambulance",
+        fire: "Fire",
+        bookDoctor: "Book a Doctor",
+        kupotSub: "Clalit · Maccabi · Leumit",
+        orderTaxi: "Order a Taxi",
+        taxiSub: "Gett · Yango",
+        shelter: "Nearest shelter",
+        shelterSub: "Find nearest shelter (Google Maps)",
+        footer: "Simple service. For you.",
+      },
+      kupot: {
+        clalit: "Clalit",
+        maccabi: "Maccabi",
+        leumit: "Leumit",
+      },
+    },
+  },
+  ru: {
+    translation: {
+      ui: {
+        language: "Язык",
+        languageSelect: "Выбор языка",
+        fontControl: "Размер текста",
+        decrease: "Уменьшить текст",
+        increase: "Увеличить текст",
+        darkMode: "Тёмная тема",
+      },
+      home: {
+        welcome: "Добро пожаловать в «Нехед» 👋",
+        subtitle: "Повседневные услуги — в один клик, на удобном языке и размере.",
+        emergency: "Экстренные службы",
+        emergencySub: "Полиция · Скорая · Пожарные",
+        police: "Полиция",
+        mda: "Скорая",
+        fire: "Пожарные",
+        bookDoctor: "Запись к врачу",
+        kupotSub: "Клалит · Маккаби · Леумит",
+        orderTaxi: "Заказать такси",
+        taxiSub: "Gett · Yango",
+        shelter: "Ближайшее убежище",
+        shelterSub: "Найти ближайшее убежище (Google Maps)",
+        footer: "Простой сервис. Для вас.",
+      },
+      kupot: {
+        clalit: "Клалит",
+        maccabi: "Маккаби",
+        leumit: "Леумит",
+      },
+    },
+  },
+  am: {
+    translation: {
+      ui: {
+        language: "ቋንቋ",
+        languageSelect: "ቋንቋ ይምረጡ",
+        fontControl: "የጽሑፍ መጠን",
+        decrease: "ጽሑፍ አሳንስ",
+        increase: "ጽሑፍ አብስ",
+        darkMode: "ጨለማ ሁኔታ",
+      },
+      home: {
+        welcome: "እንኳን ወደ “ነኸድ” በደህና መጡ 👋",
+        subtitle: "ዕለታዊ አገልግሎቶች በአንድ ጠቅ — በቋንቋዎ እና በመጠኑ.",
+        emergency: "አስቸኳይ",
+        emergencySub: "ፖሊስ · አምቡላንስ · እሳት",
+        police: "ፖሊስ",
+        mda: "አምቡላንስ",
+        fire: "እሳት",
+        bookDoctor: "ሐኪም ይዘጋጁ",
+        kupotSub: "ክላሊት · ማካቢ · ለኡሚት",
+        orderTaxi: "ታክሲ ይዘዙ",
+        taxiSub: "Gett · Yango",
+        shelter: "ቅርብ መጠለያ",
+        shelterSub: "ቅርብ መጠለያ ፈልግ (Google Maps)",
+        footer: "ቀላል አገልግሎት። ለእርስዎ።",
+      },
+      kupot: {
+        clalit: "ክላሊት",
+        maccabi: "ማካቢ",
+        leumit: "ለኡሚት",
+      },
+    },
+  },
 };
-// ------------------------------------------------
 
-// קובע שפה ראשונית: שמורה → דפדפן → גיבוי
+// קובע שפה ראשונית
 const initialLang = (() => {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved && SUPPORTED_LANGS.includes(saved)) return saved;
@@ -130,26 +148,21 @@ const initialLang = (() => {
   return SUPPORTED_LANGS.includes(nav) ? nav : FALLBACK_LANG;
 })();
 
-// מחיל כיוון ושפה על אלמנט ה-HTML
 function applyHtmlLangDir(lang) {
-  const isRTL = lang === "he"; // עברית RTL; אנגלית/רוסית/אמהרית LTR
+  const isRTL = lang === "he";
   document.documentElement.dir = isRTL ? "rtl" : "ltr";
   document.documentElement.lang = lang;
 }
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: initialLang,
-    fallbackLng: FALLBACK_LANG,
-    interpolation: { escapeValue: false },
-  });
+i18n.use(initReactI18next).init({
+  resources,
+  lng: initialLang,
+  fallbackLng: FALLBACK_LANG,
+  interpolation: { escapeValue: false },
+});
 
-// הגדר ברירת מחדל על המסמך
 applyHtmlLangDir(initialLang);
 
-// בכל החלפת שפה – שמירה והחלפת כיוון
 i18n.on("languageChanged", (lng) => {
   localStorage.setItem(STORAGE_KEY, lng);
   applyHtmlLangDir(lng);
