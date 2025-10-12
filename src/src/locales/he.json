@@ -1,0 +1,27 @@
+{
+  "ui": {
+    "language": "שפה",
+    "languageSelect": "בחירת שפה",
+    "fontControl": "בקרת גודל טקסט",
+    "increase": "הגדלת טקסט",
+    "decrease": "הקטנת טקסט",
+    "darkMode": "מצב כהה"
+  },
+  "home": {
+    "welcome": "ברוכים הבאים ל“נכד” 👋",
+    "subtitle": "שירותים יומיומיים בלחיצה – בעברית ובגדלים שמתאימים לך.",
+    "emergency": "חירום",
+    "emergencySub": "משטרה · מד״א · כיבוי",
+    "police": "משטרה",
+    "mda": "מד״א",
+    "fire": "כיבוי אש",
+    "bookDoctor": "קבע תור לרופא",
+    "kupotSub": "כללית · מכבי · לאומית",
+    "orderTaxi": "הזמן מונית",
+    "taxiSub": "Gett · Yango",
+    "shelter": "מרחב מוגן קרוב",
+    "shelterSub": "מצא מרחב מוגן קרוב (Google Maps)",
+    "footer": "שירות פשוט. בעברית. בשבילך."
+  },
+  "kupot": { "clalit": "כללית", "maccabi": "מכבי", "leumit": "לאומית" }
+}
