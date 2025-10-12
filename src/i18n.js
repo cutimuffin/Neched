@@ -1,6 +1,11 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
+export const SUPPORTED_LANGS = ["he", "en", "ru", "am"];
+const FALLBACK_LANG = "he";
+const STORAGE_KEY = "lang";
+
+// ---------- מילונים (כמו שהיה אצלך) ----------
 const resources = {
   he: { translation: {
     appTitle: 'ברוכים הבאים ל״נכד״',
@@ -115,16 +120,39 @@ const resources = {
     langLabel: "ቋንቋ",
   }},
 };
+// ------------------------------------------------
 
-const saved = localStorage.getItem("lang") || "he";
+// קובע שפה ראשונית: שמורה → דפדפן → גיבוי
+const initialLang = (() => {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved && SUPPORTED_LANGS.includes(saved)) return saved;
+  const nav = (navigator.language || "").slice(0, 2).toLowerCase();
+  return SUPPORTED_LANGS.includes(nav) ? nav : FALLBACK_LANG;
+})();
+
+// מחיל כיוון ושפה על אלמנט ה-HTML
+function applyHtmlLangDir(lang) {
+  const isRTL = lang === "he"; // עברית RTL; אנגלית/רוסית/אמהרית LTR
+  document.documentElement.dir = isRTL ? "rtl" : "ltr";
+  document.documentElement.lang = lang;
+}
 
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: saved,
-    fallbackLng: "he",
+    lng: initialLang,
+    fallbackLng: FALLBACK_LANG,
     interpolation: { escapeValue: false },
   });
+
+// הגדר ברירת מחדל על המסמך
+applyHtmlLangDir(initialLang);
+
+// בכל החלפת שפה – שמירה והחלפת כיוון
+i18n.on("languageChanged", (lng) => {
+  localStorage.setItem(STORAGE_KEY, lng);
+  applyHtmlLangDir(lng);
+});
 
 export default i18n;
