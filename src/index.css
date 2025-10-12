@@ -77,3 +77,58 @@ button, select { min-height: 44px; }
 .card-fade:nth-child(2) { animation-delay: 0.35s; }
 .card-fade:nth-child(3) { animation-delay: 0.50s; }
 .card-fade:nth-child(4) { animation-delay: 0.65s; }
+/* ──────────────────────────────────────────────────────────
+   כיבוי מוחלט של תנועה/אנימציות בכרטיסים במובייל (מסכי מגע)
+   ────────────────────────────────────────────────────────── */
+@media (hover: none) and (pointer: coarse) {
+  /* אין הבהוב כחול באנדרואיד/iOS */
+  * { -webkit-tap-highlight-color: transparent; }
+
+  /* ביטול מוחלט של תנועה/אנימציות/פילטרים בכרטיס וכל ילדיו */
+  .card,
+  .card * ,
+  .card::before,
+  .card::after {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+    will-change: auto !important;
+  }
+
+  /* שמירת צל קבוע ובלי תזוזה בלחיצה/פוקוס */
+  .card {
+    box-shadow: 0 10px 30px rgba(0,0,0,.08) !important;
+    transform: none !important;
+  }
+  .card:active,
+  .card:focus {
+    box-shadow: 0 10px 30px rgba(0,0,0,.08) !important;
+    transform: none !important;
+  }
+
+  /* אם יש תפריטי dropdown (role="menu")—בלי אנימציה/טרנזישן */
+  [role="menu"],
+  [role="menu"] * {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+   בדסקטופ: להשאיר הובר עדין, בלי "קפיצה" בלחיצה
+   ────────────────────────────────────────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+  .card {
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 36px rgba(0,0,0,.10);
+  }
+  /* בלחיצה אין scale/קפיצה */
+  .card:active {
+    transform: translateY(0);
+  }
+}
