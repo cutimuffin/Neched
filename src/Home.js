@@ -12,7 +12,7 @@ export default function Home() {
   // מצב כהה + סקייל טקסט + מצב נגיש
   const [darkMode, setDarkMode] = useState(false);
   const [fontScale, setFontScale] = useState(0); // 0=רגיל, 1=גדול, 2=ענק
-  const [easyMode, setEasyMode] = useState(false); // מצב נגיש: מגדיל טקסט/אייקונים/ריווח
+  const [easyMode, setEasyMode] = useState(false); // מצב נגיש
 
   // שעה/תאריך
   const [clock, setClock] = useState("");
@@ -26,27 +26,19 @@ export default function Home() {
     const savedScale = Number(localStorage.getItem("fontScale"));
     if (!Number.isNaN(savedScale)) setFontScale(Math.min(2, Math.max(0, savedScale)));
 
-    // שפה
     const savedLang = localStorage.getItem("lang") || "he";
     if (i18n.language !== savedLang) i18n.changeLanguage(savedLang);
 
     const tick = () => {
-      // פורמט לפי שפה (כולל RTL/LTR)
       const locale = i18n.language === "he" ? "he-IL" : i18n.language;
       const now = new Date();
-
-      const time = now.toLocaleTimeString(locale, {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-
+      const time = now.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
       const date = now.toLocaleDateString(locale, {
         weekday: "long",
         year: "numeric",
         month: "long",
         day: "numeric",
       });
-
       setClock(`${date} · ${time}`);
     };
     tick();
@@ -55,7 +47,7 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // אם השפה מתחלפת — לעדכן מייד את השעון
+  // עדכון מיידי של השעון בהחלפת שפה
   useEffect(() => {
     const locale = i18n.language === "he" ? "he-IL" : i18n.language;
     const now = new Date();
@@ -111,16 +103,47 @@ export default function Home() {
     { name: "Yango", url: "https://yango.com/he_il/" },
   ];
 
-  // קומפוננטת אריח
-  const Card = ({ children }) => (
-    <div
-      className={`relative select-none rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.08)] border ${
-        darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"
-      } ${easyMode ? "p-5" : "p-4"} flex items-center justify-between`}
-    >
-      {children}
-    </div>
-  );
+  // ===== כרטיס בסיסי – עכשיו כולו לחיץ =====
+  function Card({
+    children,
+    onClick,
+    ariaExpanded,
+    ariaHasPopup,
+  }) {
+    const isClickable = typeof onClick === "function";
+    const padd = easyMode ? "p-5" : "p-4";
+    const base =
+      `relative select-none rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.08)] border ` +
+      (darkMode ? "bg-slate-900/70 border-white/10 " : "bg-white border-slate-200 ") +
+      padd +
+      " flex items-center justify-between";
+
+    if (!isClickable) {
+      return <div className={base}>{children}</div>;
+    }
+
+    // גרסה לחיצה, נגישה במקלדת
+    const handleKey = (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onClick();
+      }
+    };
+
+    return (
+      <div
+        className={base + " cursor-pointer touch-manipulation"}
+        role="button"
+        tabIndex={0}
+        onClick={onClick}
+        onKeyDown={handleKey}
+        aria-expanded={ariaExpanded}
+        aria-haspopup={ariaHasPopup ? "menu" : undefined}
+      >
+        {children}
+      </div>
+    );
+  }
 
   // אייקון בסגנון iOS — גדל במצב נגיש / סקייל גדול
   const iosIcon = (gradFrom, gradTo, emoji) => {
@@ -150,7 +173,6 @@ export default function Home() {
             darkMode ? "bg-slate-900/70 border-white/10" : "bg-white border-slate-200"
           }`}
         >
-          {/* שורה עליונה: שעה + סרגל בקרים גמיש */}
           <div className="flex items-center justify-between gap-3">
             <div className="text-sm opacity-70">{clock}</div>
 
@@ -243,30 +265,27 @@ export default function Home() {
         </div>
       </header>
 
-      {/* אריחים – 2×2 במסכים רחבים, 1×4 במובייל. במצב נגיש: ריווח גדול יותר */}
+      {/* אריחים – 2×2 במסכים רחבים, 1×4 במובייל */}
       <main className="mx-auto max-w-3xl px-4 pb-12">
         <section className={`grid grid-cols-1 sm:grid-cols-2 ${easyMode ? "gap-6" : "gap-5"}`}>
-          {/* חירום */}
+          {/* חירום – כל הכרטיס לחיץ */}
           <div className="relative">
-            <Card>
+            <Card
+              onClick={() => {
+                setShowEmergency((v) => !v);
+                setShowKupot(false);
+                setShowTaxi(false);
+              }}
+              ariaExpanded={showEmergency}
+              ariaHasPopup
+            >
               <div>
                 <div className="font-bold">{t("home.emergency", { defaultValue: "חירום" })}</div>
                 <div className="text-sm opacity-70">
                   {t("home.emergencySub", { defaultValue: "משטרה · מד״א · כיבוי" })}
                 </div>
               </div>
-              <button
-                onClick={() => {
-                  setShowEmergency((v) => !v);
-                  setShowKupot(false);
-                  setShowTaxi(false);
-                }}
-                className="focus:outline-none touch-manipulation"
-                aria-expanded={showEmergency}
-                aria-haspopup="menu"
-              >
-                {iosIcon("from-rose-400", "to-rose-600", "🆘")}
-              </button>
+              {iosIcon("from-rose-400", "to-rose-600", "🆘")}
             </Card>
 
             {showEmergency && (
@@ -284,27 +303,24 @@ export default function Home() {
             )}
           </div>
 
-          {/* קבע תור לרופא */}
+          {/* קבע תור לרופא – כל הכרטיס לחיץ */}
           <div className="relative">
-            <Card>
+            <Card
+              onClick={() => {
+                setShowKupot((v) => !v);
+                setShowEmergency(false);
+                setShowTaxi(false);
+              }}
+              ariaExpanded={showKupot}
+              ariaHasPopup
+            >
               <div>
                 <div className="font-bold">{t("home.bookDoctor", { defaultValue: "קבע תור לרופא" })}</div>
                 <div className="text-sm opacity-70">
                   {t("home.kupotSub", { defaultValue: "כללית · מכבי · לאומית" })}
                 </div>
               </div>
-              <button
-                onClick={() => {
-                  setShowKupot((v) => !v);
-                  setShowEmergency(false);
-                  setShowTaxi(false);
-                }}
-                className="focus:outline-none touch-manipulation"
-                aria-expanded={showKupot}
-                aria-haspopup="menu"
-              >
-                {iosIcon("from-emerald-400", "to-emerald-600", "🩺")}
-              </button>
+              {iosIcon("from-emerald-400", "to-emerald-600", "🩺")}
             </Card>
 
             {showKupot && (
@@ -324,25 +340,22 @@ export default function Home() {
             )}
           </div>
 
-          {/* הזמן מונית */}
+          {/* הזמן מונית – כל הכרטיס לחיץ */}
           <div className="relative">
-            <Card>
+            <Card
+              onClick={() => {
+                setShowTaxi((v) => !v);
+                setShowEmergency(false);
+                setShowKupot(false);
+              }}
+              ariaExpanded={showTaxi}
+              ariaHasPopup
+            >
               <div>
                 <div className="font-bold">{t("home.orderTaxi", { defaultValue: "הזמן מונית" })}</div>
                 <div className="text-sm opacity-70">{t("home.taxiSub", { defaultValue: "Gett · Yango" })}</div>
               </div>
-              <button
-                onClick={() => {
-                  setShowTaxi((v) => !v);
-                  setShowEmergency(false);
-                  setShowKupot(false);
-                }}
-                className="focus:outline-none touch-manipulation"
-                aria-expanded={showTaxi}
-                aria-haspopup="menu"
-              >
-                {iosIcon("from-amber-400", "to-orange-600", "🚕")}
-              </button>
+              {iosIcon("from-amber-400", "to-orange-600", "🚕")}
             </Card>
 
             {showTaxi && (
@@ -362,7 +375,7 @@ export default function Home() {
             )}
           </div>
 
-          {/* מרחב מוגן קרוב */}
+          {/* מרחב מוגן קרוב – קישור חיצוני (נשאר <a>) */}
           <a
             className="block"
             href="https://www.google.com/maps/search/?api=1&query=%D7%9E%D7%A8%D7%97%D7%91+%D7%9E%D7%95%D7%92%D7%9F+%D7%A7%D7%A8%D7%95%D7%91"
